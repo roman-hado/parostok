@@ -36,8 +36,18 @@
                             <li data-href="{{ coll.handle }}" class="leading-[30px] border-b-[2px] border-gray-secondary cursor-pointer {% if coll.title == collection.title %} text-black-primary border-blue-primary pointer-events-none {% endif %}">{{ coll.title }}</li>
                         {% endfor %}
                     </ul>
-
-                    <div class="font-medium">
+                    {% if collection.all_tags.size > 0 %}
+                        <ul class="filter-by-tag flex gap-[10px] mt-[7px] text-sm text-gray-primary">
+                            {% for tag in collection.all_tags %}
+                                {% if current_tags contains tag %}
+                                    <li class="tag-filters__item active text-blue-primary">{{ tag | link_to_remove_tag: tag }}</li>
+                                {% else %}
+                                    <li class="tag-filters__item">{{ tag | link_to_add_tag: tag }}</li>
+                                {% endif %}
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                    <div class="font-medium flex gap-[16px]">
                         <span>Sort By:</span>
                         <select class="sort-by cursor-pointer bg-transparent outline-0 w-[105px] text-ellipsis text-[16px] leading-[21px] text-black-primary font-medium tracking-[-0.2px] text-gray-dark">
                             {% for option in collection.sort_options %}
@@ -127,7 +137,7 @@
 </div>
 
 <script>
-  const updateFilterListeners = () => {
+  const updateSortByListeners = () => {
     document.querySelectorAll('.sort-by').forEach(sortSelect => sortSelect.addEventListener('change', function(e) {
       getPage(e.target.value);
     }));
@@ -137,13 +147,23 @@
     const paginationWrapper = document.querySelector(".pagination");
     const collectionNav = document.querySelector(".collection-nav");
 
-    Array.from(paginationWrapper.querySelectorAll("li")).forEach(child => {
+    paginationWrapper.querySelectorAll("li").forEach(child => {
       child.addEventListener('click', () => renderListener(child));
     });
+    collectionNav.querySelectorAll("li").forEach(child => {
+      child.addEventListener('click', () => renderListener(child));
+    });
+  };
 
-    Array.from(collectionNav.querySelectorAll("li")).forEach(child => {
-      child.addEventListener('click', () => renderListener(child));
-    });
+  const updateTagListeners = () => {
+    const tags = document.querySelector('.filter-by-tag')?.querySelectorAll("a");
+
+    tags?.forEach(tag => {
+      tag.addEventListener("click", (e) => {
+        e.preventDefault();
+        getPage(tag.href);
+      });
+    })
   };
 
   const updateMobileCollectionListeners = () => {
@@ -159,17 +179,20 @@
 
   updatePaginationListeners();
   updateMobileCollectionListeners();
-  updateFilterListeners();
+  updateSortByListeners();
+  updateTagListeners();
 
   const updateMarkup = (newMarkup) => {
     const oldCollectionGrid = document.querySelector(".collection-product-grid");
     const newCollectionGrid = newMarkup.querySelector(".collection-product-grid");
+    const mainCollectionGrid = document.querySelector('#main-collection-product-grid');
 
-    document.querySelector('#main-collection-product-grid').removeChild(oldCollectionGrid);
-    document.querySelector('#main-collection-product-grid').appendChild(newCollectionGrid);
+    mainCollectionGrid.removeChild(oldCollectionGrid);
+    mainCollectionGrid.appendChild(newCollectionGrid);
     updatePaginationListeners();
     updateMobileCollectionListeners();
-    updateFilterListeners();
+    updateSortByListeners();
+    updateTagListeners();
   };
 
   function getPage(searchUrl) {
