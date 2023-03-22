@@ -1,0 +1,200 @@
+{%- assign sort_by = collection.sort_by | default: collection.default_sort_by -%}
+
+<div id="main-collection-product-grid">
+    <div class="collection-product-grid">
+        <div class="py-4 shadow-filters-bar md:pt-[48px] md:pb-[16px] md:shadow-none border-b-[2px] border-gray-secondary md:border-none">
+            <div class="container mx-auto">
+                <div class="flex justify-between gap-[6px] lg:hidden">
+                    <select class="mobileCollectionNav cursor-pointer bg-transparent outline-0 w-[96px] text-ellipsis text-[15px] leading-[21px] text-black-primary font-medium tracking-[0.2px]">
+                        {% for coll in collections %}
+                            <option
+                                    value="{{ coll.handle }}"
+                                    {% if coll.handle == collection.handle %}
+                                        selected="selected"
+                                    {% endif %}
+                            >
+                                {{ coll.title }}
+                            </option>
+                        {% endfor %}
+                    </select>
+
+                    <select class="sort-by cursor-pointer bg-transparent outline-0 w-[71px] text-ellipsis text-[15px] leading-[21px] text-black-primary font-medium tracking-[-0.2px]">
+                        {% for option in collection.sort_options %}
+                            <option
+                                    value="{{ collection.handle }}?sort_by={{ option.value }}"
+                                    {%- if option.value == sort_by %}
+                                        selected="selected"
+                                    {%- endif %}
+                            >{{ option.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="hidden lg:flex justify-between gap-[16px] text-base items-center">
+                    <ul class="collection-nav flex gap-[24px] text-gray-primary font-medium leading-[30px] tracking-[0.2px]">
+                        {% for coll in collections %}
+                            <li data-href="{{ coll.handle }}" class="leading-[30px] border-b-[2px] border-gray-secondary cursor-pointer {% if coll.title == collection.title %} text-black-primary border-blue-primary pointer-events-none {% endif %}">{{ coll.title }}</li>
+                        {% endfor %}
+                    </ul>
+
+                    <div class="font-medium">
+                        <span>Sort By:</span>
+                        <select class="sort-by cursor-pointer bg-transparent outline-0 w-[105px] text-ellipsis text-[16px] leading-[21px] text-black-primary font-medium tracking-[-0.2px] text-gray-dark">
+                            {% for option in collection.sort_options %}
+                                <option
+                                        value="{{ collection.handle }}?sort_by={{ option.value }}"
+                                        {%- if option.value == sort_by %}
+                                            selected="selected"
+                                        {%- endif %}
+                                >{{ option.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="container mx-auto paginate-container">
+            {% paginate collection.products by 8, window_size: 2 %}
+                <ul class="grid grid-cols-2 gap-x-2 gap-y-4 mt-8 md:grid-cols-4 md:gap-6">
+                    {% for product in collection.products %}
+                        {% liquid
+                            assign title            = product.title
+                            assign logo             = product.media[0].src
+                            assign collection_title = collection.title
+                            assign curr_price = product.price | money_without_trailing_zeros | replace: ',', ' '
+                            assign prev_price = product.compare_at_price | money_without_trailing_zeros | replace: ',', ' '
+                            assign buy_text = "Buy now"
+                            assign sold_out_text = "Sold out"
+                        %}
+
+                        <li class="w-full shadow-product p-3 flex flex-col items-center rounded-2xl md:p-8">
+                            <div class="h-[74px] md:h-[154px]">
+                                <img class="h-full" src="{{ logo | img_url: 'master' }}" alt="{{ title }}">
+                            </div>
+                            <h2 class="text-center text-ellipsis overflow-hidden leading-[21px] h-[42px] text-black-primary text-[15px] mt-[14px] font-medium md:text-base md:h-[72px] md:mt-[26px]">{{ title }}</h2>
+                            <p class="text-gray-primary text-sm mt-2 md:mt-3">{{ collection_title }}</p>
+                            <div class="flex w-auto text-base leading-[22.4px] font-bold gap-[3px] mt-[7px] md:text-[17px] md:leading-[25.5px] md:mt-3">
+                                <div class="text-black-primary"><span>$</span>{{ curr_price | slice: 1, curr_price.size }}</div>
+                                <div class="text-gray-primary line-through"><span>$</span>{{ prev_price | slice: 1, prev_price.size }}</div>
+                            </div>
+                            <div class="w-full cursor-pointer p-2 text-center text-white text-[14px] leading-[19.6px] mt-2.5 bg-blue-primary font-medium rounded-[58px] md:text-base md:mt-4">{{ buy_text }}</div>
+                        </li>
+                    {% endfor %}
+                </ul>
+
+                <ul class="pagination flex my-[32px] justify-center text-gray-dark gap-[4px] items-center text-base md:my-12">
+                    <li
+                            data-href="{{ paginate.previous.url }}"
+                            class="w-9 h-9 mr-1 rounded {% if paginate.previous %} bg-blue-primary cursor-pointer {% else %} bg-disabled pointer-events-none {% endif %}"
+                    >
+                        <span class="w-full h-full flex items-center justify-center {% if paginate.previous == blank %} pointer-events-none {% endif %}">
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M11.5 15L6.5 10L11.5 5" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </span>
+                    </li>
+                    {%- for part in paginate.parts -%}
+                        {%- if part.is_link -%}
+                            <li class="w-9 h-9 flex items-center justify-center cursor-pointer" data-href="{{ part.url }}">
+                                {{ part.title }}
+                            </li>
+                        {%- else -%}
+                            {%- if part.title == paginate.current_page -%}
+                                <li
+                                        class="active text-blue-primary w-9 h-9 flex items-center justify-center pointer-events-none"
+                                        aria-current="page"
+                                >{{ part.title }}</li>
+                            {%- else -%}
+                                <li class="w-[42px] h-9 flex items-center justify-center">{{ part.title }}</li>
+                            {%- endif -%}
+                        {%- endif -%}
+                    {%- endfor -%}
+                    <li
+                            data-href="{{ paginate.next.url }}"
+                            class="w-9 h-9 ml-1 rounded {% if paginate.next %} bg-blue-primary cursor-pointer {% else %} pointer-events-none bg-disabled {% endif %}"
+                    >
+                        <span class="w-full h-full flex items-center justify-center {% if paginate.next == blank %} pointer-events-none {% endif %}">
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M8.5 15L13.5 10L8.5 5" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </span>
+                    </li>
+                </ul>
+            {% endpaginate %}
+        </div>
+    </div>
+</div>
+
+<script>
+  const updateFilterListeners = () => {
+    document.querySelectorAll('.sort-by').forEach(sortSelect => sortSelect.addEventListener('change', function(e) {
+      getPage(e.target.value);
+    }));
+  }
+
+  const updatePaginationListeners = () => {
+    const paginationWrapper = document.querySelector(".pagination");
+    const collectionNav = document.querySelector(".collection-nav");
+
+    Array.from(paginationWrapper.querySelectorAll("li")).forEach(child => {
+      child.addEventListener('click', () => renderListener(child));
+    });
+
+    Array.from(collectionNav.querySelectorAll("li")).forEach(child => {
+      child.addEventListener('click', () => renderListener(child));
+    });
+  };
+
+  const updateMobileCollectionListeners = () => {
+    document.querySelector('.mobileCollectionNav').onchange = (e) => {
+      getPage(e.target.value);
+    }
+  };
+
+  const renderListener = (child) => {
+    const dataElHref = child.dataset.href;
+    getPage(dataElHref);
+  };
+
+  updatePaginationListeners();
+  updateMobileCollectionListeners();
+  updateFilterListeners();
+
+  const updateMarkup = (newMarkup) => {
+    const oldCollectionGrid = document.querySelector(".collection-product-grid");
+    const newCollectionGrid = newMarkup.querySelector(".collection-product-grid");
+
+    document.querySelector('#main-collection-product-grid').removeChild(oldCollectionGrid);
+    document.querySelector('#main-collection-product-grid').appendChild(newCollectionGrid);
+    updatePaginationListeners();
+    updateMobileCollectionListeners();
+    updateFilterListeners();
+  };
+
+  function getPage(searchUrl) {
+    fetch(searchUrl)
+      .then((response) => {
+        return response.text();
+      })
+      .then((text) => {
+        const newMarkup = new DOMParser().parseFromString(text, 'text/html');
+        history.pushState(null, null, searchUrl);
+        updateMarkup(newMarkup);
+      })
+      .catch((error) => {
+        throw error;
+      });
+  }
+</script>
+
+{% schema %}
+{
+    "name": "Page products",
+    "tag": "section",
+    "presets": [{
+        "category": "page",
+        "name": "Location new"
+    }]
+}
+{% endschema %}

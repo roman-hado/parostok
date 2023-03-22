@@ -1,0 +1,41 @@
+<div id="main-collection-product-grid">
+    <div class="container mx-auto">
+        <div class="filter flex">
+            <ul class="flex">
+                <li>All collections</li>
+                {% for collection in collections %}
+                    <li>{{ collection.title }}</li>
+                {% endfor %}
+            </ul>
+            -
+            <div>
+                Sort By:
+            </div>
+        </div>
+
+        <div class="products">
+            <div>product1</div>
+            <div>product2</div>
+        </div>
+    </div>
+</div>
+
+
+{% schema %}
+{
+    "name": "Page products",
+    "tag": "section",
+    "settings": [
+        {
+        "type": "text",
+        "id": "collection_link_text",
+        "label": "Collection link text",
+        "default": "В каталог"
+        }
+    ],
+    "presets": [{
+        "category": "page",
+        "name": "Page products"
+    }]
+}
+{% endschema %}

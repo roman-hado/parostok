@@ -1,0 +1,56 @@
+{% liquid
+    assign title       = section.settings.title
+    assign description = section.settings.description
+%}
+
+<div id="banner" class="bg-blue-primary">
+    <div class="banner pt-8">
+        <div class="container">
+            <div class="banner__content text-white text-center font-PlusJakartaSans">
+                {% if title != blank %}
+                    <h1 class="banner__title font-bold text-[28px] leading-[39.2px] capitalize tracking-[-0.4px]">
+                        {{ title }}
+                    </h1>
+                {% endif %}
+                {% if description != blank %}
+                    <p class="banner__description text-[15px] leading-[21px] mt-2">
+                        {{ description }}
+                    </p>
+                {% endif %}
+            </div>
+
+            <div class="banner__logo">
+            </div>
+        </div>
+    </div>
+</div>
+
+{% schema %}
+{
+    "name": "Banner",
+    "tag": "section",
+    "settings": [
+        {
+            "type": "text",
+            "id": "title",
+            "label": "Title"
+        },
+        {
+            "type": "text",
+            "id": "description",
+            "label": "Description"
+        },
+        {
+            "type": "image_picker",
+            "id": "logo",
+            "label": "Logo"
+        }
+    ],
+    "presets": [
+        {
+            "name": "Banner",
+            "category": "Home page"
+        }
+    ]
+}
+{% endschema %}
